@@ -8,19 +8,19 @@ namespace CurrencyWallet.Controllers
     [Route("api/[controller]")]
     public class WalletController : Controller
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IWalletServices _walletServices;
 
-        public WalletController(IUserRepository userRepository)
+        public WalletController(IWalletServices walletServices)
         {
-            _userRepository = userRepository;
+            _walletServices = walletServices;
         }
 
-        [HttpPost("{id}/addFunds")]
+        [HttpPost("AddFunds")]
         public IActionResult AddMoneyToWallet(int id, [FromBody] WalletTransaction transaction)
         {
             try { 
-                _userRepository.AddMoneyToWallet(id, transaction.CurrencyCode.ToUpper(), Math.Round(transaction.Amount, 2));
-                return NoContent();
+                _walletServices.AddMoneyToWallet(id, transaction.CurrencyCode.ToUpper(), Math.Round(transaction.Amount, 2));
+                return Ok("Add funds to user wallet successful.");
             }
             catch (InvalidOperationException ex)
             {
@@ -28,13 +28,13 @@ namespace CurrencyWallet.Controllers
             }
         }
 
-        [HttpPost("{id}/withdraw")]
+        [HttpPost("Withdraw")]
         public IActionResult WithdrawMoneyFromWallet(int id, [FromBody] WalletTransaction transaction)
         {
             try
             {
-                _userRepository.WithdrawMoneyFromWallet(id, transaction.CurrencyCode.ToUpper(), Math.Round(transaction.Amount,2));
-                return NoContent();
+                _walletServices.WithdrawMoneyFromWallet(id, transaction.CurrencyCode.ToUpper(), Math.Round(transaction.Amount,2));
+                return Ok("Withdraw operation successful.");
             }
             catch (InvalidOperationException ex)
             {
@@ -42,13 +42,13 @@ namespace CurrencyWallet.Controllers
             }
         }
 
-        [HttpPost("{id}/exchange")]
+        [HttpPost("Exchange")]
         public IActionResult ExchangeCurrency(int id, [FromBody] CurrencyExchange exchange)
         {
             try
             {
-                _userRepository.ExchangeCurrency(id, exchange.FromCurrency.ToUpper(), exchange.ToCurrency.ToUpper(), Math.Round(exchange.Amount, 2));
-                return NoContent();
+                _walletServices.ExchangeCurrency(id, exchange.FromCurrency.ToUpper(), exchange.ToCurrency.ToUpper(), Math.Round(exchange.Amount, 2));
+                return Ok($"Exchange operation successful.");
             }
             catch (InvalidOperationException ex)
             {

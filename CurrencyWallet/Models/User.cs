@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace CurrencyWallet.Models
+﻿namespace CurrencyWallet.Models
 {
     public class User
     {
@@ -11,10 +9,10 @@ namespace CurrencyWallet.Models
 
         public User(int id, string name, string email)
         {
-            Id = id; 
-            Name = name; 
+            Id = id;
+            Name = name;
             Email = email;
-            Wallet = new Dictionary<string, decimal>{ { "PLN", 0 } };
+            Wallet = new Dictionary<string, decimal> { { "PLN", 0 } };
         }
     }
 }

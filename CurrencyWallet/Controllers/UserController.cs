@@ -20,7 +20,7 @@ namespace CurrencyWallet.Controllers
         {
             return Ok(_userRepository.GetAllUsers());
         }
-        [HttpGet("{id}")]
+        [HttpGet("GetUserById")]
         public IActionResult GetUserById(int id)
         {
             var user = _userRepository.GetUserById(id);
@@ -28,19 +28,11 @@ namespace CurrencyWallet.Controllers
             return user != null ? Ok(user) : NotFound();
         }
 
-        [HttpPost]
+        [HttpPost("AddUser")]
         public IActionResult AddUser(UserModel user)
         {
             _userRepository.AddUser(user);
             return CreatedAtAction(nameof(GetUserById), new { }, user);
-        }
-
-        [HttpPost("{id}/wallet")]
-        public IActionResult AddMoneyToWallet(int id, [FromBody] WalletTransaction transaction)
-        {
-            _userRepository.AddMoneyToWallet(id, transaction.CurrencyCode, Math.Round(transaction.Amount, 2));
-            
-            return NoContent();
         }
     }
 }
