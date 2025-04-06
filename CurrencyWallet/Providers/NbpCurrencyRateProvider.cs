@@ -36,7 +36,6 @@ namespace CurrencyWallet.Providers
         {
             try
             {
-                
                 var response = await _httpClient.GetAsync(_apiUrl);
                 response.EnsureSuccessStatusCode();
 

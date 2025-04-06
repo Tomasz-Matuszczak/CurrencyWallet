@@ -3,139 +3,165 @@ using CurrencyWallet.Models;
 using CurrencyWallet.Services;
 using Moq;
 
-[TestClass]
-public class WalletServicesTests
+namespace CurrencyWallet.Services.Tests
 {
-    private Mock<ICurrencyRateProvider> _currencyRateProviderMock;
-    private Mock<IUserRepository> _userRepositoryMock;
-    private WalletServices _walletServices;
-
-    [TestInitialize]
-    public void Initialize()
+    [TestClass]
+    public class WalletServicesTests
     {
-        _currencyRateProviderMock = new Mock<ICurrencyRateProvider>();
-        _userRepositoryMock = new Mock<IUserRepository>();
-        _walletServices = new WalletServices(_currencyRateProviderMock.Object, _userRepositoryMock.Object);
-    }
+        private Mock<ICurrencyRateProvider> _currencyRateProviderMock;
+        private Mock<IUserRepository> _userRepositoryMock;
+        private WalletServices _walletServices;
 
-    [TestMethod]
-    public void AddMoneyToWallet_ValidCurrency_AddsMoneyToWallet()
-    {
-        // Arrange
-        var userId = 1;
-        var currencyCode = "USD";
-        var amount = 100m;
-        var user = new User(userId, "John", "john@example.com");
-        _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
-        _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+        [TestInitialize]
+        public void Initialize()
         {
-            new() { Currency = "TestName", Code = "USD", Mid = 3.8m }
+            _currencyRateProviderMock = new Mock<ICurrencyRateProvider>();
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _walletServices = new WalletServices(_currencyRateProviderMock.Object, _userRepositoryMock.Object);
+        }
+
+        [TestMethod]
+        public void AddMoneyToWallet_ValidCurrency_AddsMoneyToWallet()
+        {
+            // Arrange
+            var userId = 1;
+            var currencyCode = "PLN";
+            var amount = 100m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
+            _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+        {
+            new() { Currency = "TestName1", Code = "PLN", Mid = 3.8m }
         });
 
-        // Act
-        _walletServices.AddMoneyToWallet(userId, currencyCode, amount);
+            // Act
+            _walletServices.AddMoneyToWallet(userId, currencyCode, amount);
 
-        // Assert
-        Assert.AreEqual(100m, user.Wallet[currencyCode]);
-    }
+            // Assert
+            Assert.AreEqual(100m, user.Wallet[currencyCode]);
+        }
 
-    [TestMethod]
-    [ExpectedException(typeof(InvalidOperationException))]
-    public void AddMoneyToWallet_InvalidCurrency_ThrowsException()
-    {
-        // Arrange
-        var userId = 1;
-        var currencyCode = "XYZ";
-        var amount = 100m;
-        var user = new User(userId, "John", "john@example.com");
-        _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
-        _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void AddMoneyToWallet_InvalidCurrency_ThrowsException()
         {
-            new() {Currency = "TestName",  Code = "USD", Mid = 3.8m }
+            // Arrange
+            var userId = 1;
+            var currencyCode = "JMD";
+            var amount = 100m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
+            _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+        {
+            new() {Currency = "TestName1",  Code = "PLN", Mid = 3.8m }
         });
 
-        // Act
-        _walletServices.AddMoneyToWallet(userId, currencyCode, amount);
-    }
+            // Act
+            _walletServices.AddMoneyToWallet(userId, currencyCode, amount);
+        }
 
-    [TestMethod]
-    public void WithdrawMoneyFromWallet_SufficientFunds_WithdrawsMoney()
-    {
-        // Arrange
-        var userId = 1;
-        var currencyCode = "USD";
-        var amount = 50m;
-        var user = new User(userId, "John", "john@example.com");
-        user.Wallet[currencyCode] = 100m;
-        _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
-
-        // Act
-        _walletServices.WithdrawMoneyFromWallet(userId, currencyCode, amount);
-
-        // Assert
-        Assert.AreEqual(50m, user.Wallet[currencyCode]);
-    }
-
-    [TestMethod]
-    [ExpectedException(typeof(InvalidOperationException))]
-    public void WithdrawMoneyFromWallet_InsufficientFunds_ThrowsException()
-    {
-        // Arrange
-        var userId = 1;
-        var currencyCode = "USD";
-        var amount = 150m;
-        var user = new User(userId, "John", "john@example.com");
-        user.Wallet[currencyCode] = 100m;
-        _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
-
-        // Act
-        _walletServices.WithdrawMoneyFromWallet(userId, currencyCode, amount);
-    }
-
-    [TestMethod]
-    public void ExchangeCurrency_ValidCurrencies_ExchangesMoney()
-    {
-        // Arrange
-        var userId = 1;
-        var fromCurrency = "USD";
-        var toCurrency = "EUR";
-        var amount = 100m;
-        var user = new User(userId, "John", "john@example.com");
-        user.Wallet[fromCurrency] = 200m;
-        _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
-        _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+        [TestMethod]
+        public void WithdrawMoneyFromWallet_SufficientFunds_WithdrawsMoney()
         {
-            new() { Currency = "TestName",  Code = "USD", Mid = 3.8m },
-            new() { Currency = "TestName", Code = "EUR", Mid = 4.5m }
-        });
+            // Arrange
+            var userId = 1;
+            var currencyCode = "PLN";
+            var amount = 50m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            user.Wallet[currencyCode] = 100m;
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
 
-        // Act
-        _walletServices.ExchangeCurrency(userId, fromCurrency, toCurrency, amount);
+            // Act
+            _walletServices.WithdrawMoneyFromWallet(userId, currencyCode, amount);
 
-        // Assert
-        Assert.AreEqual(100m, user.Wallet[fromCurrency]);
-        Assert.AreEqual(84.21m, user.Wallet[toCurrency]);
-    }
+            // Assert
+            Assert.AreEqual(50m, user.Wallet[currencyCode]);
+        }
 
-    [TestMethod]
-    [ExpectedException(typeof(InvalidOperationException))]
-    public void ExchangeCurrency_InsufficientFunds_ThrowsException()
-    {
-        // Arrange
-        var userId = 1;
-        var fromCurrency = "USD";
-        var toCurrency = "EUR";
-        var amount = 300m;
-        var user = new User(userId, "John", "john@example.com");
-        user.Wallet[fromCurrency] = 200m;
-        _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
-        _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void WithdrawMoneyFromWallet_InsufficientFunds_ThrowsException()
         {
-            new() { Currency = "TestName",  Code = "USD", Mid = 3.8m },
-            new() { Currency = "TestName", Code = "EUR", Mid = 4.5m }
-        });
+            // Arrange
+            var userId = 1;
+            var currencyCode = "PLN";
+            var amount = 150m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            user.Wallet[currencyCode] = 100m;
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
 
-        // Act
-        _walletServices.ExchangeCurrency(userId, fromCurrency, toCurrency, amount);
+            // Act
+            _walletServices.WithdrawMoneyFromWallet(userId, currencyCode, amount);
+        }
+
+        [TestMethod]
+        public void ExchangeCurrency_ValidCurrenciesExchangeFromPLN_ExchangesMoney()
+        {
+            // Arrange
+            var userId = 1;
+            var fromCurrency = "PLN";
+            var toCurrency = "CRC";
+            var amount = 100m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            user.Wallet[fromCurrency] = 200m;
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
+            _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(
+            [
+                new() { Currency = "TestName2", Code = "CRC", Mid = 0.007709m }
+            ]);
+
+            // Act
+            _walletServices.ExchangeCurrency(userId, fromCurrency, toCurrency, amount);
+
+            // Assert
+            Assert.AreEqual(100m, user.Wallet[fromCurrency]);
+            Assert.AreEqual(12971.85m, user.Wallet[toCurrency]);
+        }
+
+        [TestMethod]
+        public void ExchangeCurrency_ValidCurrenciesExchangeFromJDMToCRC_ExchangesMoney()
+        {
+            // Arrange
+            var userId = 1;
+            var fromCurrency = "JMD";
+            var toCurrency = "CRC";
+            var amount = 100m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            user.Wallet[fromCurrency] = 200m;
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
+            _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(
+            [
+                new() { Currency = "TestName1", Code = "JMD", Mid = 0.0245m },
+                new() { Currency = "TestName2", Code = "CRC", Mid = 0.007709m }
+            ]);
+
+            // Act
+            _walletServices.ExchangeCurrency(userId, fromCurrency, toCurrency, amount);
+
+            // Assert
+            Assert.AreEqual(100m, user.Wallet[fromCurrency]);
+            Assert.AreEqual(317,81m, user.Wallet[toCurrency]);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void ExchangeCurrency_InsufficientFunds_ThrowsException()
+        {
+            // Arrange
+            var userId = 1;
+            var fromCurrency = "PLN";
+            var toCurrency = "CRC";
+            var amount = 300m;
+            var user = new User(userId, "Tom", "Tom@test.com");
+            user.Wallet[fromCurrency] = 200m;
+            _userRepositoryMock.Setup(r => r.GetUserById(userId)).Returns(user);
+            _currencyRateProviderMock.Setup(p => p.GetCurrencyRatesAsync()).ReturnsAsync(new List<CurrencyRate>
+            {
+                new() { Currency = "TestName2", Code = "CRC", Mid = 4.5m }
+            });
+
+            // Act
+            _walletServices.ExchangeCurrency(userId, fromCurrency, toCurrency, amount);
+        }
     }
 }

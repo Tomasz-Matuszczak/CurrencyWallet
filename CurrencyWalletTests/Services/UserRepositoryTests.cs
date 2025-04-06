@@ -3,116 +3,126 @@ using CurrencyWallet.Models;
 using CurrencyWallet.Services;
 using Moq;
 
-[TestClass]
-public class UserRepositoryTests
+namespace CurrencyWallet.Services.Tests
 {
-    private Mock<ICurrencyRateProvider> _currencyRateProviderMock;
-    private UserRepository _userRepository;
-
-    [TestInitialize]
-    public void Initialize()
+    [TestClass]
+    public class UserRepositoryTests
     {
-        _currencyRateProviderMock = new Mock<ICurrencyRateProvider>();
-        _userRepository = new UserRepository(_currencyRateProviderMock.Object);
-    }
+        private Mock<ICurrencyRateProvider> _currencyRateProviderMock;
+        private UserRepository _userRepository;
 
-    [TestMethod]
-    public void AddUser_AddsUserToRepository()
-    {
-        // Arrange
-        var user = new UserModel { Name = "John", Email = "john@example.com" };
+        [TestInitialize]
+        public void Initialize()
+        {
+            _currencyRateProviderMock = new Mock<ICurrencyRateProvider>();
+            _userRepository = new UserRepository(_currencyRateProviderMock.Object);
+        }
 
-        // Act
-        _userRepository.AddUser(user);
+        [TestMethod]
+        public void AddUser_AddsUserToRepository()
+        {
+            // Arrange
+            var user = new UserModel { Name = "Tom", Email = "Tom@test.com" };
 
-        // Assert
-        var users = _userRepository.GetAllUsers();
-        Assert.AreEqual(1, users.Count());
-        Assert.AreEqual("John", users.First().Name);
-        Assert.AreEqual("john@example.com", users.First().Email);
-    }
+            // Act
+            _userRepository.AddUser(user);
 
-    [TestMethod]
-    public void GetAllUsers_ReturnsAllUsers()
-    {
-        // Arrange
-        var user1 = new UserModel { Name = "John", Email = "john@example.com" };
-        var user2 = new UserModel { Name = "Jane", Email = "jane@example.com" };
-        _userRepository.AddUser(user1);
-        _userRepository.AddUser(user2);
+            // Assert
+            var users = _userRepository.GetAllUsers();
+            Assert.AreEqual(1, users.Count());
+            Assert.AreEqual("Tom", users.First().Name);
+            Assert.AreEqual("Tom@test.com", users.First().Email);
+        }
 
-        // Act
-        var users = _userRepository.GetAllUsers();
+        [TestMethod]
+        public void GetAllUsers_ReturnsAllUsers()
+        {
+            // Arrange
+            var user1 = new UserModel { Name = "Tom", Email = "Tom@test.com" };
+            var user2 = new UserModel { Name = "Ania", Email = "Ania@test.com" };
+            _userRepository.AddUser(user1);
+            _userRepository.AddUser(user2);
 
-        // Assert
-        Assert.AreEqual(2, users.Count());
-        CollectionAssert.Contains(users.ToList(), new User(1, "John", "john@example.com"));
-        CollectionAssert.Contains(users.ToList(), new User(2, "Jane", "jane@example.com"));
-    }
+            // Act
+            var users = _userRepository.GetAllUsers().ToList();
 
-    [TestMethod]
-    public void GetUserById_ReturnsUserWithMatchingId()
-    {
-        // Arrange
-        var user1 = new UserModel { Name = "John", Email = "john@example.com" };
-        var user2 = new UserModel { Name = "Jane", Email = "jane@example.com" };
-        _userRepository.AddUser(user1);
-        _userRepository.AddUser(user2);
+            // Assert
+            Assert.AreEqual(2, users.Count());
 
-        // Act
-        var user = _userRepository.GetUserById(2);
+            Assert.AreEqual(users[0].Id, 0);
+            Assert.AreEqual(users[0].Name, "Tom");
+            Assert.AreEqual(users[0].Email, "Tom@test.com");
+            Assert.IsTrue(users[0].Wallet.ContainsKey("PLN"));
+            Assert.AreEqual(users[1].Id, 1);
+            Assert.AreEqual(users[1].Name, "Ania");
+            Assert.AreEqual(users[1].Email, "Ania@test.com");
+            Assert.IsTrue(users[1].Wallet.ContainsKey("PLN"));
+        }
 
-        // Assert
-        Assert.IsNotNull(user);
-        Assert.AreEqual(2, user.Id);
-        Assert.AreEqual("Jane", user.Name);
-        Assert.AreEqual("jane@example.com", user.Email);
-    }
+        [TestMethod]
+        public void GetUserById_ReturnsUserWithMatchingId()
+        {
+            // Arrange
+            var user1 = new UserModel { Name = "Tom", Email = "Tom@test.com" };
+            var user2 = new UserModel { Name = "Ania", Email = "Ania@test.com" };
+            _userRepository.AddUser(user1);
+            _userRepository.AddUser(user2);
 
-    [TestMethod]
-    public void GetUserById_ReturnsNullForNonExistingId()
-    {
-        // Arrange
-        var user = new UserModel { Name = "John", Email = "john@example.com" };
-        _userRepository.AddUser(user);
+            // Act
+            var user = _userRepository.GetUserById(1);
 
-        // Act
-        var result = _userRepository.GetUserById(2);
+            // Assert
+            Assert.IsNotNull(user);
+            Assert.AreEqual(1, user.Id);
+            Assert.AreEqual("Ania", user.Name);
+            Assert.AreEqual("Ania@test.com", user.Email);
+        }
 
-        // Assert
-        Assert.IsNull(result);
-    }
+        [TestMethod]
+        public void GetUserById_ReturnsNullForNonExistingId()
+        {
+            // Arrange
+            var user = new UserModel { Name = "Tom", Email = "Tom@test.com" };
+            _userRepository.AddUser(user);
 
-    [TestMethod]
-    public void GetUserByName_ReturnsUserWithMatchingName()
-    {
-        // Arrange
-        var user1 = new UserModel { Name = "John", Email = "john@example.com" };
-        var user2 = new UserModel { Name = "Jane", Email = "jane@example.com" };
-        _userRepository.AddUser(user1);
-        _userRepository.AddUser(user2);
+            // Act
+            var result = _userRepository.GetUserById(2);
 
-        // Act
-        var user = _userRepository.GetUserByName("jane");
+            // Assert
+            Assert.IsNull(result);
+        }
 
-        // Assert
-        Assert.IsNotNull(user);
-        Assert.AreEqual(2, user.Id);
-        Assert.AreEqual("Jane", user.Name);
-        Assert.AreEqual("jane@example.com", user.Email);
-    }
+        [TestMethod]
+        public void GetUserByName_ReturnsUserWithMatchingName()
+        {
+            // Arrange
+            var user1 = new UserModel { Name = "Tom", Email = "Tom@test.com" };
+            var user2 = new UserModel { Name = "Ania", Email = "Ania@test.com" };
+            _userRepository.AddUser(user1);
+            _userRepository.AddUser(user2);
 
-    [TestMethod]
-    public void GetUserByName_ReturnsNullForNonExistingName()
-    {
-        // Arrange
-        var user = new UserModel { Name = "John", Email = "john@example.com" };
-        _userRepository.AddUser(user);
+            // Act
+            var user = _userRepository.GetUserByName("Ania");
 
-        // Act
-        var result = _userRepository.GetUserByName("Jane");
+            // Assert
+            Assert.IsNotNull(user);
+            Assert.AreEqual(1, user.Id);
+            Assert.AreEqual("Ania", user.Name);
+            Assert.AreEqual("Ania@test.com", user.Email);
+        }
 
-        // Assert
-        Assert.IsNull(result);
+        [TestMethod]
+        public void GetUserByName_ReturnsNullForNonExistingName()
+        {
+            // Arrange
+            var user = new UserModel { Name = "Tom", Email = "Tom@test.com" };
+            _userRepository.AddUser(user);
+
+            // Act
+            var result = _userRepository.GetUserByName("Ania");
+
+            // Assert
+            Assert.IsNull(result);
+        }
     }
 }

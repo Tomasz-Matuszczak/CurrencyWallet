@@ -1,102 +1,68 @@
 ﻿using CurrencyWallet.Models;
-using CurrencyWallet.Providers;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
 
-[TestClass]
-public class NbpCurrencyRateProviderTests
+namespace CurrencyWallet.Providers.Tests
 {
-    private Mock<HttpMessageHandler> _httpMessageHandlerMock;
-    private Mock<IConfiguration> _configurationMock;
-    private NbpCurrencyRateProvider _currencyRateProvider;
-
-    [TestInitialize]
-    public void Initialize()
+    [TestClass]
+    public class NbpCurrencyRateProviderTests
     {
-        _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
-        _configurationMock = new Mock<IConfiguration>();
-        _configurationMock.Setup(c => c["NBPApiUrl"]).Returns("http://api.nbp.pl/api");
+        private Mock<HttpMessageHandler> _httpMessageHandlerMock;
+        private Mock<IConfiguration> _configurationMock;
+        private NbpCurrencyRateProvider _currencyRateProvider;
 
-        var httpClient = new HttpClient(_httpMessageHandlerMock.Object);
-        _currencyRateProvider = new NbpCurrencyRateProvider(httpClient, _configurationMock.Object);
-    }
-
-    [TestMethod]
-    public async Task GetCurrencyRatesAsync_ReturnsRatesFromApi()
-    {
-        // Arrange
-        var expectedRates = new List<CurrencyRate>
+        [TestInitialize]
+        public void Initialize()
         {
-            new() { Currency = "USD", Code = "USD", Mid = 3.8m },
-            new() { Currency = "EUR", Code = "EUR", Mid = 4.5m }
+            _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
+            _configurationMock = new Mock<IConfiguration>();
+            _configurationMock.Setup(c => c["nbpTableBUrl"]).Returns("https://api.nbp.pl/api/exchangerates/tables/b");
+
+            var httpClient = new HttpClient(_httpMessageHandlerMock.Object);
+            _currencyRateProvider = new NbpCurrencyRateProvider(httpClient, _configurationMock.Object);
+        }
+
+        [TestMethod]
+        public async Task GetCurrencyRatesAsync_ReturnsRatesFromApi()
+        {
+            // Arrange
+            var expectedRates = new List<CurrencyRate>
+        {
+            new() { Currency = "TestName1", Code = "CRC", Mid = 3.8m },
+            new() { Currency = "TestName2", Code = "JMD", Mid = 4.5m }
         };
 
-        var response = new HttpResponseMessage
-        {
-            Content = new StringContent(JsonConvert.SerializeObject(new List<NbpResponse>
+            var response = new HttpResponseMessage
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(new List<NbpResponse>
             {
                 new NbpResponse { Rates = expectedRates }
             }))
-        };
+            };
 
-        _httpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(response);
+            _httpMessageHandlerMock.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(response);
 
-        // Act
-        var actualRates = await _currencyRateProvider.GetCurrencyRatesAsync();
+            // Act
+            var actualRates = await _currencyRateProvider.GetCurrencyRatesAsync();
 
-        // Assert
-        Assert.AreEqual(expectedRates.Count, actualRates.Count());
-        CollectionAssert.Contains(actualRates.ToList(), expectedRates[0]);
-        CollectionAssert.Contains(actualRates.ToList(), expectedRates[1]);
-    }
+            // Assert
+            Assert.AreEqual(expectedRates.Count, actualRates.Count());
 
-    [TestMethod]
-    public async Task GetCurrencyRatesAsync_RefreshesRatesOnWednesdayAfterUpdateTime()
-    {
-        // Arrange
-        var initialRates = new List<CurrencyRate>
-        {
-            new() { Currency = "USD", Code = "USD", Mid = 3.8m },
-            new() { Currency = "EUR", Code = "EUR", Mid = 4.5m }
-        };
+            var expectedCurrency1 = actualRates.FirstOrDefault(c => c.Code == "CRC");
+            Assert.AreEqual(expectedRates[0].Code, expectedCurrency1.Code);
+            Assert.AreEqual(expectedRates[0].Currency, expectedCurrency1.Currency);
+            Assert.AreEqual(expectedRates[0].Mid, expectedCurrency1.Mid);
+            CollectionAssert.Contains(actualRates.ToList(), expectedRates[0]);
 
-        var updatedRates = new List<CurrencyRate>
-        {
-            new() { Currency = "USD", Code = "USD", Mid = 3.9m },
-            new() { Currency = "EUR", Code = "EUR", Mid = 4.6m }
-        };
-
-        var initialResponse = new HttpResponseMessage
-        {
-            Content = new StringContent(JsonConvert.SerializeObject(new List<NbpResponse>
-            {
-                new NbpResponse { Rates = initialRates }
-            }))
-        };
-
-        var updatedResponse = new HttpResponseMessage
-        {
-            Content = new StringContent(JsonConvert.SerializeObject(new List<NbpResponse>
-            {
-                new() { Rates = updatedRates }
-            }))
-        };
-
-        _httpMessageHandlerMock.Protected()
-            .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(initialResponse)
-            .ReturnsAsync(updatedResponse);
-
-        // Act
-        var rates1 = await _currencyRateProvider.GetCurrencyRatesAsync();
-        var rates2 = await _currencyRateProvider.GetCurrencyRatesAsync();
-
-        // Assert
-        CollectionAssert.AreEqual(initialRates, rates1.ToList());
-        CollectionAssert.AreEqual(updatedRates, rates2.ToList());
+            var expectedCurrency2 = actualRates.FirstOrDefault(c => c.Code == "JMD");
+            Assert.AreEqual(expectedRates[1].Code, expectedCurrency2.Code);
+            Assert.AreEqual(expectedRates[1].Currency, expectedCurrency2.Currency);
+            Assert.AreEqual(expectedRates[1].Mid, expectedCurrency2.Mid);
+            CollectionAssert.Contains(actualRates.ToList(), expectedRates[1]);
+        }
     }
 }

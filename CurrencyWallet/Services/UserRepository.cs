@@ -7,7 +7,7 @@ namespace CurrencyWallet.Services
     {
         private readonly List<User> _users = [];
         private readonly ICurrencyRateProvider _currencyRateProvider;
-        private int _nextUser = 1;
+        private int _nextUser = 0;
 
         public UserRepository(ICurrencyRateProvider currencyRateProvider)
         {
