@@ -1,5 +1,7 @@
 using CurrencyWallet.Interfaces;
 using CurrencyWallet.Providers;
+using CurrencyWallet.Providers;
+using CurrencyWallet.Services;
 using CurrencyWallet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +23,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 var app = builder.Build();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -31,6 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwagger();
     app.UseSwagger();
+    app.UseSwaggerUI();
     app.UseSwaggerUI();
     app.UseSwaggerUI();
 }
