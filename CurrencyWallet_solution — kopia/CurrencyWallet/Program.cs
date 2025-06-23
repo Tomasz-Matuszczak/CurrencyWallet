@@ -22,6 +22,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+    app.UseSwagger();
+    app.UseSwagger();
     app.UseSwaggerUI();
 }
 
