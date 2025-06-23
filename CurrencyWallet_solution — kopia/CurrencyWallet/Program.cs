@@ -26,10 +26,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwagger();
     app.UseSwagger();
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.UseSwaggerUI();
 }
 
 
+app.MapControllers();
 app.MapControllers();
 app.MapControllers();
 app.MapControllers();
