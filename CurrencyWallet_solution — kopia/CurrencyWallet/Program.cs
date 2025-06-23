@@ -35,6 +35,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseSwaggerUI();
     app.UseSwaggerUI();
+    app.UseSwaggerUI();
 }
 
 
