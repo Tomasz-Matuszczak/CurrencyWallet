@@ -15,6 +15,7 @@ builder.Services.AddSingleton<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IWalletServices, WalletServices>();
 builder.Services.AddSingleton<IWalletServices, WalletServices>();
 builder.Services.AddSingleton<IWalletServices, WalletServices>();
+builder.Services.AddSingleton<IWalletServices, WalletServices>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
