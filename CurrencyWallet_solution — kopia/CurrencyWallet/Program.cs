@@ -26,6 +26,7 @@ if (app.Environment.IsDevelopment())
 {
 {
     app.UseSwagger();
+    app.UseSwagger();
     app.UseSwaggerUI();
 }
 
@@ -34,4 +35,6 @@ app.MapControllers();
 app.MapControllers();
 app.MapControllers();
 
+app.Run();
+app.Run();
 app.Run();
