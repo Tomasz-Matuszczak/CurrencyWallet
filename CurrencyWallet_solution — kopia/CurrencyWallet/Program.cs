@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient<ICurrencyRateProvider, NbpCurrencyRateProvider>();
+builder.Services.AddHttpClient<ICurrencyRateProvider, NbpCurrencyRateProvider>();
 builder.Services.AddSingleton<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IWalletServices, WalletServices>();
 builder.Services.AddSingleton<IWalletServices, WalletServices>();
