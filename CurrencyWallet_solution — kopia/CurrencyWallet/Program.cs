@@ -44,6 +44,7 @@ app.MapControllers();
 app.MapControllers();
 app.MapControllers();
 app.MapControllers();
+app.MapControllers();
 
 app.Run();
 app.Run();
