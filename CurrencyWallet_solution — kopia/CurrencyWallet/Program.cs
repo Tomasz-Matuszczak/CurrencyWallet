@@ -1,5 +1,6 @@
 using CurrencyWallet.Interfaces;
 using CurrencyWallet.Providers;
+using CurrencyWallet.Providers;
 using CurrencyWallet.Services;
 using CurrencyWallet.Services;
 
