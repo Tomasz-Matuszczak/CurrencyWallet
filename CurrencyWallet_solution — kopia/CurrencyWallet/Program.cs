@@ -31,5 +31,6 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.MapControllers();
+app.MapControllers();
 
 app.Run();
